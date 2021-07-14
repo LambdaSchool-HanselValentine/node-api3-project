@@ -27,7 +27,10 @@ server.get("/", (req, res) => {
 
 //catch handler:
 server.use((req, res, next) => {
-	res.status(404).json({ message: "Resource could not be found" });
+	res.status(404).json({
+		message:
+			"There's an error somewhere. Check your request method, check our url, idk. Fix it Hansel!",
+	});
 });
 
 // root error handler middleware =============

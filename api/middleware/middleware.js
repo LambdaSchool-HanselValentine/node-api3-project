@@ -14,26 +14,26 @@ function logger(req, res, next) {
 	next();
 }
 
-function validateUserId(req, res, next) {
+// const validateUserId = async (req, res, next) => {
+async function validateUserId(req, res, next) {
 	// 	this middleware will be used for all user endpoints that include an id parameter in the url (ex: /api/users/:id and it should check the database to make sure there is a user with that id.
 	// if the id parameter is valid, store the user object as req.user and allow the request to continue
 	// if the id parameter does not match any user id in the database, respond with status 404 and { message: "user not found" }
 	const { id } = req.params;
-	User.getById(id)
-		.then((id) => {
-			if (id) {
-				req.user = user;
-				next();
-			} else {
-				next({ errorMessage: "user not found", status: 400 });
-			}
-		})
-		.catch(
-			next({
-				errorMessage: "There's an error validating the user ID",
-				status: 500,
-			}),
-		);
+	try {
+		const user = await User.getById(id);
+		if (user) {
+			req.user = user;
+			next();
+		} else {
+			next({ errorMessage: "user not found", status: 404 });
+		}
+	} catch (err) {
+		next({
+			errorMessage: "There's an error validating the user ID",
+			status: 500,
+		});
+	}
 }
 
 function validateUser(req, res, next) {
