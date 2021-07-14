@@ -25,20 +25,45 @@ function validateUserId(req, res, next) {
 				req.user = user;
 				next();
 			} else {
-				next({ errorMessage: "User not found" });
+				next({ errorMessage: "user not found", status: 400 });
 			}
 		})
-		.catch(next({ errorMessage: "There's an error validating the user" }));
+		.catch(
+			next({
+				errorMessage: "There's an error validating the user ID",
+				status: 500,
+			}),
+		);
 }
 
 function validateUser(req, res, next) {
 	// 	validateUser validates the body on a request to create or update a user
 	// if the request body lacks the required name field, respond with status 400 and { message: "missing required name field" }
+	const { name } = req.body;
+	try {
+		if (name && name.length > 0) {
+			next();
+		} else {
+			next({ errorMessage: "missing required name field", status: 400 });
+		}
+	} catch {
+		next({ errorMessage: "There's an error validating the user", status: 500 });
+	}
 }
 
 function validatePost(req, res, next) {
 	// 	validatePost validates the body on a request to create a new post
 	// if the request body lacks the required text field, respond with status 400 and { message: "missing required text field" }
+	const { body } = req.body;
+	try {
+		if (body && body.length > 0) {
+			next();
+		} else {
+			next({ errorMessage: "missing required text field" });
+		}
+	} catch {
+		next({ errorMessage: "There's an error validating the Post", status: 500 });
+	}
 }
 
 // do not forget to expose these functions to other modules
