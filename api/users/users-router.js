@@ -35,40 +35,85 @@ router.get("/:id", Middleware.validateUserId, (req, res) => {
 	}
 });
 
-router.post("/", Middleware.validateUser, (req, res) => {
+router.post("/", Middleware.validateUser, async (req, res) => {
 	// RETURN THE NEWLY CREATED USER OBJECT
 	// this needs a middleware to check that the request body is valid
 	const { body } = req.body;
-	Users.insert(body)
-		.then((newUser) => {
+	try {
+		const newUser = await Users.insert(body);
+		if (newUser) {
 			res.status(201).json(newUser);
-		})
-		.catch((err) => {
-			res.status(500).json({ message: "error in users-router POST /" });
-		});
+		} else {
+			res.status(req.status).json(req.errorMessage);
+		}
+	} catch {
+		res.status(500).json({ message: "error in users-router POST /" });
+	}
 });
 
-router.put("/:id", (req, res) => {
-	// RETURN THE FRESHLY UPDATED USER OBJECT
-	// this needs a middleware to verify user id
-	// and another middleware to check that the request body is valid
-});
+router.put(
+	"/:id",
+	Middleware.validateUserId,
+	Middleware.validateUser,
+	async (req, res, next) => {
+		// RETURN THE FRESHLY UPDATED USER OBJECT
+		// this needs a middleware to verify user id
+		// and another middleware to check that the request body is valid
+		try {
+			const changes = req.body;
+			const { id } = req.params;
+			const updatedUser = await Users.update(id, changes);
+			res.status(200).json(changes);
+		} catch {
+			res.status(500).json({ message: "error in users-router PUT /:id" });
+		}
+	},
+);
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", Middleware.validateUserId, async (req, res) => {
 	// RETURN THE FRESHLY DELETED USER OBJECT
 	// this needs a middleware to verify user id
+	try {
+		const { id } = req.params;
+		const removedId = await Users.remove(id);
+		res.status(200).json({ message: "User was removed from database" });
+	} catch (err) {
+		res.status(500).json({ message: "error in users-router in DELETE /:id" });
+	}
 });
 
-router.get("/:id/posts", (req, res) => {
+router.get("/:id/posts", Middleware.validateUserId, async (req, res) => {
 	// RETURN THE ARRAY OF USER POSTS
 	// this needs a middleware to verify user id
+	try {
+		const { id } = req.params;
+		const usersPosts = await Users.getUserPosts(id);
+		res.status(200).json(usersPosts);
+	} catch (err) {
+		res.status(500).json({ message: "error in users-router GET /:id/posts" });
+	}
 });
 
-router.post("/:id/posts", (req, res) => {
-	// RETURN THE NEWLY CREATED USER POST
-	// this needs a middleware to verify user id
-	// and another middleware to check that the request body is valid
-});
+router.post(
+	"/:id/posts",
+	Middleware.validateUserId,
+	Middleware.validatePost,
+	async (req, res) => {
+		// RETURN THE NEWLY CREATED USER POST
+		// this needs a middleware to verify user id
+		// and another middleware to check that the request body is valid
+		try {
+			const newPost = await Posts.insert({
+				text: req.body.text,
+				user_id: req.user.id,
+			});
+
+			res.status(201).json(newPost);
+		} catch (err) {
+			res.status(500).json({ message: "error in users-router POST /:id/post" });
+		}
+	},
+);
 
 // =============
 //

@@ -41,10 +41,10 @@ function validateUser(req, res, next) {
 	// if the request body lacks the required name field, respond with status 400 and { message: "missing required name field" }
 	const { name } = req.body;
 	try {
-		if (name && name.length > 0) {
-			next();
-		} else {
+		if (!name || name.length <= 1) {
 			next({ errorMessage: "missing required name field", status: 400 });
+		} else {
+			next();
 		}
 	} catch {
 		next({ errorMessage: "There's an error validating the user", status: 500 });
