@@ -6,10 +6,10 @@ function logger(req, res, next) {
 	// this middleware runs on every request made to the API
 	const method = req.method;
 	const url = req.url;
-	const time = new Date().toLocaleDateString("en-US");
+	const timeStamp = new Date().toLocaleDateString("en-US");
 
 	console.log(`
-  ${time} // ${method} request to ${url}
+  ${timeStamp} || ${method} request to ${url}
   `);
 	next();
 }
@@ -41,7 +41,7 @@ function validateUser(req, res, next) {
 	// if the request body lacks the required name field, respond with status 400 and { message: "missing required name field" }
 	const { name } = req.body;
 	try {
-		if (!name || name.length <= 1) {
+		if (!name || Object.keys(name).length === 0) {
 			next({ errorMessage: "missing required name field", status: 400 });
 		} else {
 			next();

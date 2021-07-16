@@ -1,24 +1,22 @@
 const express = require("express");
-
 const server = express();
 
 // remember express by default cannot parse JSON in request bodies
 server.use(express.json());
 
 // global middlewares and the user's router need to be connected here
+// const helmet = require("helmet");
+// const morgan = require("morgan");
+// server.use(helmet());
+// server.use(morgan("dev"));
 
-const helmet = require("helmet");
-const morgan = require("morgan");
-server.use(helmet());
-server.use(morgan("dev"));
-
-const Middleware = require("./middleware/middleware");
+const { logger } = require("./middleware/middleware");
 const usersRouter = require("./users/users-router");
 
-server.use("/api/users", usersRouter);
-server.use(Middleware.logger);
-
 // ! the middlewares should be in the right order
+// ! it is important logger comes first because it has to go thru the usersRouter
+server.use(logger);
+server.use("/api/users", usersRouter);
 
 //root handler:
 server.get("/", (req, res) => {
