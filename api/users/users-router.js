@@ -19,17 +19,17 @@ router.get("/", (req, res) => {
 		});
 });
 
-router.get("/:id", Middleware.validateUserId, (req, res) => {
+router.get("/:id", Middleware.validateUserId, (req, res, next) => {
 	// RETURN THE USER OBJECT
 
-	res.json(req.user);
+	// res.json(req.user);
 
-	// //fool proof way:
-	// if (!req.user) {
-	// 	res.status(req.status).json(req.message);
-	// } else {
-	// next();
-	// }
+	//fool proof way:
+	if (!req.user) {
+		res.status(req.status).json(req.message);
+	} else {
+		next();
+	}
 });
 
 router.post("/", Middleware.validateUser, async (req, res, next) => {
@@ -64,8 +64,10 @@ router.delete("/:id", Middleware.validateUserId, async (req, res, next) => {
 
 	const { id } = req.params;
 	Users.remove(id)
-		.then(() => {
-			res.status(200).json({ message: "User was removed from database" });
+		.then((user) => {
+			res
+				.status(200)
+				.json({ user: user, message: "User was removed from database" });
 		})
 		.catch(next);
 });
