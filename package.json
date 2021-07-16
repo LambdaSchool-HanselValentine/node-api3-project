@@ -15,6 +15,7 @@
     "dependencies": {
         "express": "^4.17.1",
         "helmet": "^4.6.0",
+        "httpie": "^1.1.2",
         "knex": "^0.95.6",
         "morgan": "^1.10.0",
         "sqlite3": "^5.0.2"

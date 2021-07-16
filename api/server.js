@@ -5,10 +5,10 @@ const server = express();
 server.use(express.json());
 
 // global middlewares and the user's router need to be connected here
-// const helmet = require("helmet");
-// const morgan = require("morgan");
-// server.use(helmet());
-// server.use(morgan("dev"));
+const helmet = require("helmet");
+const morgan = require("morgan");
+server.use(helmet());
+server.use(morgan("dev"));
 
 const { logger } = require("./middleware/middleware");
 const usersRouter = require("./users/users-router");
@@ -25,7 +25,7 @@ server.get("/", (req, res) => {
 
 //catch handler:
 server.use((req, res, next) => {
-	res.status(404).json({
+	res.status(500).json({
 		message:
 			"There's an error somewhere. Check your request method, check our url, idk. Fix it Hansel!",
 	});

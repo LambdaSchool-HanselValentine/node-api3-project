@@ -15,7 +15,7 @@ router.get("/", (req, res) => {
 			res.status(200).json(users);
 		})
 		.catch(() => {
-			res.status(500).json({ message: "error in users-router GET /" });
+			res.status(500).json({ message: "error fetching users" });
 		});
 });
 
@@ -23,32 +23,25 @@ router.get("/:id", Middleware.validateUserId, (req, res) => {
 	// RETURN THE USER OBJECT
 	// this needs a middleware to verify user id
 
-	//? don't need to invoke .getByUserId() anymore because we already invoked that in our middleware
-	try {
-		if (req.user) {
-			res.status(200).json(req.user);
-		} else {
-			res.status(req.status).json(req.errorMessage);
-		}
-	} catch {
-		res.status(500).json({ message: "error in users-router GET /:id" });
-	}
+	res.json(req.user);
+
+	// //fool proof way:
+	// if (!req.user) {
+	// 	res.status(req.status).json(req.message);
+	// } else {
+	// 	res.status(200).json(req.user);
+	// }
 });
 
-router.post("/", Middleware.validateUser, async (req, res) => {
+router.post("/", Middleware.validateUser, async (req, res, next) => {
 	// RETURN THE NEWLY CREATED USER OBJECT
 	// this needs a middleware to check that the request body is valid
-	const { body } = req.body;
-	try {
-		const newUser = await Users.insert(body);
-		if (newUser) {
-			res.status(201).json(newUser);
-		} else {
-			res.status(req.status).json(req.errorMessage);
-		}
-	} catch {
-		res.status(500).json({ message: "error in users-router POST /" });
-	}
+
+	Users.insert({ name: req.name })
+		.then((newUser) => {
+			res.status(200).json(newUser);
+		})
+		.catch(next);
 });
 
 router.put(
@@ -116,13 +109,12 @@ router.post(
 );
 
 // =============
-//
+//Always come at the end
 //Users-Router error handler:
 router.use((err, req, res, next) => {
-	const message =
-		err?.errorMessage || "Something went wrong in the Users router";
+	const message = err?.message || "Something went wrong in the Users router";
 	const status = err?.status || 500;
-	res.status(`${status}`).json({ message });
+	res.status(`${status}`).json({ message, stack: err.stack });
 });
 
 // do not forget to export the router
